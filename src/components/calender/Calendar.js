@@ -29,8 +29,8 @@ function MyCalendar() {
 
   const handleEventClick = (arg) => {
     console.log("event Click", arg);
-    prompt("Enter a new title for the event:")
-    const title = prompt("Enter a new title for the event:");
+    const title = prompt("Enter a new title for the event:").trim();
+    console.log(typeof title, "titleClick");
     if (title) {
       const event = {
         ...arg.event.toPlainObject(),
@@ -58,6 +58,7 @@ function MyCalendar() {
         }}
         selectable={true}
         selectMirror={true}
+        displayEventTime={false}
         events={events}
         height={"90vh"}
         dateClick={handleDateClick}
