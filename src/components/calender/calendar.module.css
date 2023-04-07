@@ -1,0 +1,49 @@
+.calModal {
+  border-radius: 5px;
+  background-color: white;
+  padding: 30px;
+  display: grid;
+  grid-template-rows: auto;
+  gap: 30px;
+}
+
+.calModal > input{
+  width: 300px;
+  height: 30px;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+
+.calButton {
+  display: flex;
+  margin-top: 1rem;
+  gap: 10px;
+}
+
+.calButton > button {
+  flex-grow: 1;
+  height: 40px;
+}
+
+.calSelect {
+  width: 300px;
+  height: 30px;
+  padding: 0 10px;
+}
+
+.calSelectTime {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+}
+
+.timeInput {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: start;
+}
+
+.timeInput > input {
+  min-width: 130px;
+}

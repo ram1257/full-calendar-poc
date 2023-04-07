@@ -12,7 +12,6 @@ export const calendarSlice = createSlice({
       state.calendarState = [...state.calendarState, payload];
     },
     updateEvent: (state, { payload }) => {
-      console.log(state, "<=state", payload, "hello calender");
       state.calendarState = state.calendarState.map((event) =>
         +event.id === +payload.id ? payload : event
       );
