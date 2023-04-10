@@ -22,7 +22,7 @@ export const calendarSlice = createSlice({
   },
 });
 
-// Action creators are generated for each case reducer function
+// Action creators are generated for each case reducer function.
 export const { addEvent, updateEvent, deleteEvent } = calendarSlice.actions;
 
 export const selectCalendarState = (state) => state.calendar.calendarState;

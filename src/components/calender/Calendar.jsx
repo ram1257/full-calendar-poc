@@ -4,47 +4,75 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useDispatch, useSelector } from "react-redux";
-import { deleteEvent, selectCalendarState, updateEvent } from "./calendarSlice";
+import {
+  addEvent,
+  deleteEvent,
+  selectCalendarState,
+  updateEvent,
+} from "./calendarSlice";
 import Modal from "../modal/Modal";
 import styles from "./calendar.module.css";
 import { timeConversion } from "../../helper/utils";
 import moment from "moment";
 
 function MyCalendar() {
-  const [selectedData, setSelectedDate] = useState();
+  const [selectedDate, setSelectedDate] = useState();
+  const [isCreateMode, setIsCreateMode] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const events = useSelector(selectCalendarState);
   const calendarRef = useRef(null);
   const dispatch = useDispatch();
+  const [inputs, setInputs] = useState({
+    title: "",
+    type: "",
+    start: "",
+    end: "",
+  });
   const eventSelectOptions = ["type1", "type2", "type3"];
 
+  const handleInputs = (event) => {
+    const name = event.target.name;
+    const value = event.target.value;
+    setInputs((values) => ({ ...values, [name]: value }));
+  };
+
   const handleDateClick = (arg) => {
+    isCreateMode && setInputs("")
+    setIsCreateMode(true);
     setSelectedDate(arg);
     setShowModal(true);
-    // const event = {
-    //   id: Date.now(),
-    //   title: "New Event",
-    //   start: arg.date,
-    //   end: moment(arg.date).add(1, "hour").toDate(),
-    //   type: arg?.title ?? "message",
-    // };
-    // dispatch(addEvent(event));
+  };
+
+  const setTime = (timestamp) => {
+    const date = new Date(timestamp);
+    return `${date.getHours()}:${date.getMinutes()}`;
+  };
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    const event = {
+      id: isCreateMode ? Date.now() : inputs?.id,
+      title: inputs.title,
+      start: selectedDate.dateStr + "T" + inputs.start + ":00",
+      end: selectedDate.dateStr + "T" + inputs.end + ":00",
+      type: inputs?.type ?? "message",
+      backgroundColor: getEventBackgroundColor(inputs?.type),
+    };
+    isCreateMode ? dispatch(addEvent(event)) : dispatch(updateEvent(event));
+    setShowModal(false);
+    setInputs("");
   };
 
   const handleEventClick = (arg) => {
-    arg.info.jsEvent.preventDefault();
-    const title = prompt("Enter a new title for the event:")?.trim();
-    console.log(title);
-    if (title) {
-      const event = {
-        ...arg.event.toPlainObject(),
-        title,
-        backgroundColor: getEventBackgroundColor(title),
-      };
-      dispatch(updateEvent(event));
-    } else {
-      dispatch(deleteEvent(arg.event.id));
-    }
+    setIsCreateMode(false);
+    setShowModal(true);
+    const id = { ...arg.event.toPlainObject() }.id;
+    const eventData = events.filter((event) => +event.id === +id);
+    setInputs({
+      ...eventData[0],
+      start: setTime(eventData[0]?.start),
+      end: setTime(eventData[0]?.end),
+    });
   };
 
   const isSelectable = (info) => {
@@ -54,32 +82,25 @@ function MyCalendar() {
   };
 
   const handleEventRender = ({ event, el, info }) => {
-    // console.log(event, "event45");
     el.className = `fc-event-${event.extendedProps.type}`;
-    // info.el.style.backgroundColor = getEventBackgroundColor(event.type);
   };
 
   const getEventBackgroundColor = (eventType) => {
-    console.log(eventType, "eventtype");
-    switch (eventType.toLowerCase()) {
-      case "meeting":
+    switch (eventType?.toLowerCase()) {
+      case "type1":
         return "#FF0000";
-      case "lunch":
+      case "type2":
         return "#00FF00";
-      case "dinner":
+      case "type3":
         return "#0000FF";
       default:
         return "gray";
     }
   };
 
-  const onOptionChangeHandler = (event) => {
-    console.log("User Selected Value - ", event.target.value);
-  };
-
-   // Set the valid range to today and later
-   const validRange = {
-    start: moment().startOf('day').toISOString(),
+  // Set the valid range to today and later
+  const validRange = {
+    start: moment().startOf("day").toISOString(),
     end: null,
   };
 
@@ -107,43 +128,77 @@ function MyCalendar() {
 
       {showModal && (
         <Modal>
-          <div className={styles.calModal}>
-            <h2>Create event on {timeConversion(selectedData?.date)}</h2>
-            <input placeholder="Add title" required />
-            <select
-              onChange={onOptionChangeHandler}
-              className={styles.calSelect}
-            >
-              <option>Select type</option>
-              {eventSelectOptions.map((option, index) => {
-                return <option key={index}>{option}</option>;
-              })}
-            </select>
-            <div className={styles.calSelectTime}>
-              <div className={styles.timeInput}>
-                <label>Select start time</label>
-                <input type="time" min={new Date()}/>
+          <form onSubmit={handleFormSubmit}>
+            <div className={styles.calModal}>
+              <h2>Create event on {timeConversion(selectedDate?.date)}</h2>
+              <input
+                name="title"
+                placeholder="Add title"
+                onChange={handleInputs}
+                value={inputs.title}
+                required
+              />
+              <select
+                name="type"
+                onChange={handleInputs}
+                className={styles.calSelect}
+                value={inputs.type}
+                required
+              >
+                <option>Select type</option>
+                {eventSelectOptions.map((option, index) => {
+                  return <option key={index}>{option}</option>;
+                })}
+              </select>
+              <div className={styles.calSelectTime}>
+                <div className={styles.timeInput}>
+                  <label>Select start time</label>
+                  <input
+                    onChange={handleInputs}
+                    name="start"
+                    type="time"
+                    value={inputs.start}
+                    min={new Date()}
+                    required
+                  />
+                </div>
+                <div className={styles.timeInput}>
+                  <label>Select end time</label>
+                  <input
+                    onChange={handleInputs}
+                    name="end"
+                    value={inputs.end}
+                    type="time"
+                    required
+                  />
+                </div>
               </div>
-              <div className={styles.timeInput}>
-                <label>Select end time</label>
-                <input type="time" />
+              {/* <select
+                onChange={onOptionChangeHandler}
+                className={styles.calSelect}
+              >
+                <option>Select users</option>
+                {eventSelectOptions.map((option, index) => {
+                  return <option key={index}>{option}</option>;
+                })}
+              </select> */}
+              <div className={styles.calButton}>
+                <button type="submit">
+                  {isCreateMode ? "Save" : "Update"}
+                </button>
+               {!isCreateMode && <button
+                  type="button"
+                  onClick={() => {
+                    dispatch(deleteEvent(inputs?.id));
+                    setShowModal(false);
+                  }}
+                >
+                  Delete
+                </button>}
+                <button onClick={() => setShowModal(false)}>Cancel</button>
               </div>
             </div>
-            <select
-              onChange={onOptionChangeHandler}
-              className={styles.calSelect}
-            >
-              <option>Select users</option>
-              {eventSelectOptions.map((option, index) => {
-                return <option key={index}>{option}</option>;
-              })}
-            </select>
-            <div className={styles.calButton}>
-              <button>Save</button>
-              <button>Delete</button>
-              <button onClick={() => setShowModal(false)}>Cancel</button>
-            </div>
-          </div>
+          </form>
         </Modal>
       )}
     </div>
