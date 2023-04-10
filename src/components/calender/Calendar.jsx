@@ -4,6 +4,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useDispatch, useSelector } from "react-redux";
+import Select from "react-select";
 import {
   addEvent,
   deleteEvent,
@@ -28,7 +29,21 @@ function MyCalendar() {
     start: "",
     end: "",
   });
+  const [selectedUsers, setSelectedUsers] = useState([]);
+
   const eventSelectOptions = ["type1", "type2", "type3"];
+
+  // const eventSelectOptions1 = [
+  //   { value: "type1", label: "type1" },
+  //   { value: "type2", label: "type2" },
+  //   { value: "type3", label: "type3" },
+  // ];
+
+  const options = [
+    { value: "user01", label: "user01" },
+    { value: "user02", label: "user02" },
+    { value: "user03", label: "user03" },
+  ];
 
   const handleInputs = (event) => {
     const name = event.target.name;
@@ -37,7 +52,7 @@ function MyCalendar() {
   };
 
   const handleDateClick = (arg) => {
-    isCreateMode && setInputs("")
+    isCreateMode && setInputs("");
     setIsCreateMode(true);
     setSelectedDate(arg);
     setShowModal(true);
@@ -53,10 +68,11 @@ function MyCalendar() {
     const event = {
       id: isCreateMode ? Date.now() : inputs?.id,
       title: inputs.title,
-      start: selectedDate.dateStr + "T" + inputs.start + ":00",
-      end: selectedDate.dateStr + "T" + inputs.end + ":00",
+      start: selectedDate?.dateStr + "T" + inputs.start + ":00",
+      end: selectedDate?.dateStr + "T" + inputs.end + ":00",
       type: inputs?.type ?? "message",
       backgroundColor: getEventBackgroundColor(inputs?.type),
+      users:selectedUsers
     };
     isCreateMode ? dispatch(addEvent(event)) : dispatch(updateEvent(event));
     setShowModal(false);
@@ -73,6 +89,7 @@ function MyCalendar() {
       start: setTime(eventData[0]?.start),
       end: setTime(eventData[0]?.end),
     });
+    console.log(selectedDate,"selected Date")
   };
 
   const isSelectable = (info) => {
@@ -102,6 +119,10 @@ function MyCalendar() {
   const validRange = {
     start: moment().startOf("day").toISOString(),
     end: null,
+  };
+
+  const handleMultiSelectChange = (selectedUsers) => {
+    setSelectedUsers(selectedUsers);
   };
 
   return (
@@ -173,28 +194,28 @@ function MyCalendar() {
                   />
                 </div>
               </div>
-              {/* <select
-                onChange={onOptionChangeHandler}
-                className={styles.calSelect}
-              >
-                <option>Select users</option>
-                {eventSelectOptions.map((option, index) => {
-                  return <option key={index}>{option}</option>;
-                })}
-              </select> */}
+              <Select
+                isMulti
+                value={selectedUsers || inputs?.selectedUsers}
+                onChange={handleMultiSelectChange}
+                options={options}
+              />
+
               <div className={styles.calButton}>
                 <button type="submit">
                   {isCreateMode ? "Save" : "Update"}
                 </button>
-               {!isCreateMode && <button
-                  type="button"
-                  onClick={() => {
-                    dispatch(deleteEvent(inputs?.id));
-                    setShowModal(false);
-                  }}
-                >
-                  Delete
-                </button>}
+                {!isCreateMode && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      dispatch(deleteEvent(inputs?.id));
+                      setShowModal(false);
+                    }}
+                  >
+                    Delete
+                  </button>
+                )}
                 <button onClick={() => setShowModal(false)}>Cancel</button>
               </div>
             </div>
