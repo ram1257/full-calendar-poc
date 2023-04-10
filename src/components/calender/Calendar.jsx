@@ -1,4 +1,5 @@
-import React, { useRef, useState } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useEffect, useRef, useState } from "react";
 import Fullcalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -15,6 +16,10 @@ import Modal from "../modal/Modal";
 import styles from "./calendar.module.css";
 import { timeConversion } from "../../helper/utils";
 import moment from "moment";
+import {
+  fetchEventData,
+  postEventData,
+} from "../../store/calendar/calendarActions";
 
 function MyCalendar() {
   const [selectedDate, setSelectedDate] = useState();
@@ -30,6 +35,16 @@ function MyCalendar() {
     end: "",
   });
   const [selectedUsers, setSelectedUsers] = useState([]);
+
+  useEffect(() => {
+    dispatch(fetchEventData());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (events) {
+      dispatch(postEventData(events));
+    }
+  }, [events.length]);
 
   const eventSelectOptions = ["type1", "type2", "type3"];
   const options = [
