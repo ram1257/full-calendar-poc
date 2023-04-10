@@ -32,13 +32,6 @@ function MyCalendar() {
   const [selectedUsers, setSelectedUsers] = useState([]);
 
   const eventSelectOptions = ["type1", "type2", "type3"];
-
-  // const eventSelectOptions1 = [
-  //   { value: "type1", label: "type1" },
-  //   { value: "type2", label: "type2" },
-  //   { value: "type3", label: "type3" },
-  // ];
-
   const options = [
     { value: "user01", label: "user01" },
     { value: "user02", label: "user02" },
@@ -54,8 +47,8 @@ function MyCalendar() {
   const handleDateClick = (arg) => {
     isCreateMode && setInputs("");
     setIsCreateMode(true);
-    setSelectedDate(arg);
     setShowModal(true);
+    setSelectedDate({ date: arg.date, dateStr: arg.dateStr });
   };
 
   const setTime = (timestamp) => {
@@ -72,11 +65,14 @@ function MyCalendar() {
       end: selectedDate?.dateStr + "T" + inputs.end + ":00",
       type: inputs?.type ?? "message",
       backgroundColor: getEventBackgroundColor(inputs?.type),
-      users:selectedUsers
+      users: selectedUsers,
     };
     isCreateMode ? dispatch(addEvent(event)) : dispatch(updateEvent(event));
     setShowModal(false);
+
     setInputs("");
+    setSelectedUsers([]);
+    // setSelectedDate();
   };
 
   const handleEventClick = (arg) => {
@@ -89,7 +85,12 @@ function MyCalendar() {
       start: setTime(eventData[0]?.start),
       end: setTime(eventData[0]?.end),
     });
-    console.log(selectedDate,"selected Date")
+    setSelectedUsers(eventData[0].users);
+    setSelectedDate(eventData[0]);
+    setSelectedDate({
+      dateStr: `${arg.event.startStr?.split("T")[0]}`,
+      date: `${arg.event.start}`,
+    });
   };
 
   const isSelectable = (info) => {
@@ -195,8 +196,9 @@ function MyCalendar() {
                 </div>
               </div>
               <Select
+                name="users"
                 isMulti
-                value={selectedUsers || inputs?.selectedUsers}
+                value={selectedUsers}
                 onChange={handleMultiSelectChange}
                 options={options}
               />
