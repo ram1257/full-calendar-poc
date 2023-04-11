@@ -214,14 +214,14 @@ function MyCalendar() {
                   />
                 </div>
               </div>
-              <div style={{textAlign:'left'}}>
-              <Select
-                name="users"
-                isMulti
-                value={selectedUsers}
-                onChange={handleMultiSelectChange}
-                options={options}
-              />
+              <div style={{ textAlign: "left" }}>
+                <Select
+                  name="users"
+                  isMulti
+                  value={selectedUsers}
+                  onChange={handleMultiSelectChange}
+                  options={options}
+                />
               </div>
               <div className={styles.calButton}>
                 <button type="submit">
