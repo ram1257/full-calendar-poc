@@ -44,7 +44,7 @@ function MyCalendar() {
   }, [dispatch]);
 
   useEffect(() => {
-    if (events.length > 0) {
+    if (events[0]?.id) {
       dispatch(postEventData(events));
     }
   }, [events.length]);
@@ -214,6 +214,7 @@ function MyCalendar() {
                   />
                 </div>
               </div>
+              <div style={{textAlign:'left'}}>
               <Select
                 name="users"
                 isMulti
@@ -221,7 +222,7 @@ function MyCalendar() {
                 onChange={handleMultiSelectChange}
                 options={options}
               />
-
+              </div>
               <div className={styles.calButton}>
                 <button type="submit">
                   {isCreateMode ? "Save" : "Update"}
