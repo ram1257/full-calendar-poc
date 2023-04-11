@@ -40,7 +40,7 @@ export const postEventData = (events) => {
       const myArray = JSON.parse(storedData);
       localStorage?.setItem(
         "calEvents",
-        JSON.stringify([...myArray, ...events])
+        JSON.stringify([...events])
       );
     }else{
         localStorage.setItem("calEvents",JSON.stringify(events))

@@ -6,26 +6,29 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useDispatch, useSelector } from "react-redux";
 import Select from "react-select";
-import {
-  addEvent,
-  deleteEvent,
-  selectCalendarState,
-  updateEvent,
-} from "./calendarSlice";
+// import {
+//   addEvent,
+//   deleteEvent,
+//   selectCalendarState,
+//   updateEvent,
+// } from "./calendarSlice";
 import Modal from "../modal/Modal";
 import styles from "./calendar.module.css";
 import { timeConversion } from "../../helper/utils";
 import moment from "moment";
 import {
+  addEvent,
+  deleteEvent,
   fetchEventData,
   postEventData,
+  updateEvent,
 } from "../../store/calendar/calendarActions";
 
 function MyCalendar() {
   const [selectedDate, setSelectedDate] = useState();
   const [isCreateMode, setIsCreateMode] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const events = useSelector(selectCalendarState);
+  const events = useSelector((state) => state.calendarState);
   const calendarRef = useRef(null);
   const dispatch = useDispatch();
   const [inputs, setInputs] = useState({
@@ -41,7 +44,7 @@ function MyCalendar() {
   }, [dispatch]);
 
   useEffect(() => {
-    if (events) {
+    if (events.length > 0) {
       dispatch(postEventData(events));
     }
   }, [events.length]);
@@ -68,7 +71,9 @@ function MyCalendar() {
 
   const setTime = (timestamp) => {
     const date = new Date(timestamp);
-    return `${date.getHours()}:${date.getMinutes()}`;
+    const currentHours = ("0" + date.getHours()).slice(-2);
+    const currentMinutes = ("0" + date.getMinutes()).slice(-2);
+    return `${currentHours}:${currentMinutes}`;
   };
 
   const handleFormSubmit = (e) => {
@@ -87,7 +92,6 @@ function MyCalendar() {
 
     setInputs("");
     setSelectedUsers([]);
-    // setSelectedDate();
   };
 
   const handleEventClick = (arg) => {
@@ -233,7 +237,15 @@ function MyCalendar() {
                     Delete
                   </button>
                 )}
-                <button onClick={() => setShowModal(false)}>Cancel</button>
+                <button
+                  onClick={() => {
+                    setInputs({});
+                    setSelectedUsers([]);
+                    setShowModal(false);
+                  }}
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           </form>
