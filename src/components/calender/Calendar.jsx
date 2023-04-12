@@ -39,6 +39,7 @@ function MyCalendar() {
   });
   const [selectedUsers, setSelectedUsers] = useState([]);
 
+
   useEffect(() => {
     dispatch(fetchEventData());
   }, [dispatch]);
@@ -47,7 +48,7 @@ function MyCalendar() {
     if (events[0]?.id) {
       dispatch(postEventData(events));
     }
-  }, [events.length]);
+  }, [events,events.length]);
 
   const eventSelectOptions = ["type1", "type2", "type3"];
   const options = [
@@ -118,7 +119,7 @@ function MyCalendar() {
     return date >= today;
   };
 
-  const handleEventRender = ({ event, el, info }) => {
+  const handleEventRender = ({ event, el }) => {
     el.className = `fc-event-${event.extendedProps.type}`;
   };
 
@@ -232,6 +233,8 @@ function MyCalendar() {
                     type="button"
                     onClick={() => {
                       dispatch(deleteEvent(inputs?.id));
+                      setInputs({});
+                      setSelectedUsers([]);
                       setShowModal(false);
                     }}
                   >
