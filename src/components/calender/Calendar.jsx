@@ -14,6 +14,7 @@ import Select from "react-select";
 // } from "./calendarSlice";
 import Modal from "../modal/Modal";
 import styles from "./calendar.module.css";
+import "./calendar.css";
 import { timeConversion } from "../../helper/utils";
 import moment from "moment";
 import {
@@ -39,7 +40,6 @@ function MyCalendar() {
   });
   const [selectedUsers, setSelectedUsers] = useState([]);
 
-
   useEffect(() => {
     dispatch(fetchEventData());
   }, [dispatch]);
@@ -48,7 +48,7 @@ function MyCalendar() {
     if (events[0]?.id) {
       dispatch(postEventData(events));
     }
-  }, [events,events.length]);
+  }, [events, events.length]);
 
   const eventSelectOptions = ["type1", "type2", "type3"];
   const options = [
@@ -148,26 +148,36 @@ function MyCalendar() {
 
   return (
     <div>
-      <Fullcalendar
-        ref={calendarRef}
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        initialView={"dayGridMonth"}
-        headerToolbar={{
-          start: "today prev,next",
-          center: "title",
-          end: "dayGridMonth,timeGridWeek,timeGridDay",
-        }}
-        selectable={isSelectable}
-        selectMirror={true}
-        displayEventTime={false}
-        events={events}
-        height={"90vh"}
-        dateClick={handleDateClick}
-        eventClick={handleEventClick}
-        eventRender={handleEventRender}
-        validRange={validRange}
-      />
-
+      <div className="fullCalendarWrapper">
+        <Fullcalendar
+          ref={calendarRef}
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          initialView={"dayGridMonth"}
+          headerToolbar={{
+            center: "prev,title,next",
+            start: "today",
+            end: "dayGridMonth,timeGridWeek,timeGridDay",
+          }}
+          selectable={isSelectable}
+          selectMirror={true}
+          // displayEventTime={false}
+          className="hello"
+          events={events}
+          height={"90vh"}
+          dateClick={handleDateClick}
+          eventClick={handleEventClick}
+          eventRender={handleEventRender}
+          validRange={validRange}
+          buttonText={{
+            today:    'Today',
+            month:    'Month',
+            week:     'Week',
+            day:      'Day',
+            list:     'List'
+          }}
+          themeSystem='bootstrap5'
+        />
+      </div>
       {showModal && (
         <Modal>
           <form onSubmit={handleFormSubmit}>

@@ -1,0 +1,4 @@
+.fullCalendarWrapper .fc-header-toolbar div:nth-child(2) div {
+    display: flex;
+    gap: 10px;
+  }
