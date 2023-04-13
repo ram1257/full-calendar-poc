@@ -1,4 +1,15 @@
 .fullCalendarWrapper .fc-header-toolbar div:nth-child(2) div {
-    display: flex;
-    gap: 10px;
-  }
+  display: flex;
+  gap: 10px;
+}
+
+.fullCalendarWrapper button {
+  background-color: blue !important;
+  border: none !important;
+  margin: 1px !important;
+}
+
+.fc-day-sat, .fc-day-sun{
+  pointer-events: none !important;
+  background-color: rgb(236, 241, 174) !important;
+}

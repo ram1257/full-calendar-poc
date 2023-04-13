@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Fullcalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
+import rrulePlugin from "@fullcalendar/rrule";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useDispatch, useSelector } from "react-redux";
 import Select from "react-select";
@@ -29,17 +30,19 @@ function MyCalendar() {
   const [selectedDate, setSelectedDate] = useState();
   const [isCreateMode, setIsCreateMode] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [eventDays, setEventDays] = useState([]);
   const events = useSelector((state) => state.calendarState);
   const calendarRef = useRef(null);
   const dispatch = useDispatch();
+  const [endDate, setEndDate] = useState();
   const [inputs, setInputs] = useState({
     title: "",
     type: "",
     start: "",
     end: "",
+    endDate: "",
   });
   const [selectedUsers, setSelectedUsers] = useState([]);
-
   useEffect(() => {
     dispatch(fetchEventData());
   }, [dispatch]);
@@ -50,11 +53,25 @@ function MyCalendar() {
     }
   }, [events, events.length]);
 
+  const resetState = () => {
+    setInputs({});
+    setSelectedUsers([]);
+  };
+
   const eventSelectOptions = ["type1", "type2", "type3"];
   const options = [
     { value: "user01", label: "user01" },
     { value: "user02", label: "user02" },
     { value: "user03", label: "user03" },
+  ];
+  const weeklyRecurse = [
+    { value: "MO", label: "Monday" },
+    { value: "TU", label: "TuesDay" },
+    { value: "WE", label: "Wednesday" },
+    { value: "TH", label: "Thursday" },
+    { value: "FR", label: "Friday" },
+    { value: "SA", label: "Saturday" },
+    { value: "SU", label: "Sunday" },
   ];
 
   const handleInputs = (event) => {
@@ -79,20 +96,28 @@ function MyCalendar() {
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
+    const daysOfWeek = eventDays?.map((a) => a?.value);
+    const rrule = `FREQ=WEEKLY;BYDAY=${daysOfWeek?.join(",")}`;
     const event = {
       id: isCreateMode ? Date.now() : inputs?.id,
       title: inputs.title,
       start: selectedDate?.dateStr + "T" + inputs.start + ":00",
-      end: selectedDate?.dateStr + "T" + inputs.end + ":00",
+      end: endDate
+        ? endDate + "T" + inputs.end + ":00"
+        : selectedDate?.dateStr + "T" + inputs.end + ":00",
       type: inputs?.type ?? "message",
       backgroundColor: getEventBackgroundColor(inputs?.type),
       users: selectedUsers,
+      recursiveEvents: eventDays,
     };
+    if (eventDays.length > 0) {
+      event.rrule = rrule;
+    } else {
+      event.rrule ?? delete event.rrule;
+    }
     isCreateMode ? dispatch(addEvent(event)) : dispatch(updateEvent(event));
+    resetState();
     setShowModal(false);
-
-    setInputs("");
-    setSelectedUsers([]);
   };
 
   const handleEventClick = (arg) => {
@@ -104,9 +129,9 @@ function MyCalendar() {
       ...eventData[0],
       start: setTime(eventData[0]?.start),
       end: setTime(eventData[0]?.end),
+      endDate: eventData[0]?.end.split("T")[0],
     });
     setSelectedUsers(eventData[0].users);
-    setSelectedDate(eventData[0]);
     setSelectedDate({
       dateStr: `${arg.event.startStr?.split("T")[0]}`,
       date: `${arg.event.start}`,
@@ -151,7 +176,12 @@ function MyCalendar() {
       <div className="fullCalendarWrapper">
         <Fullcalendar
           ref={calendarRef}
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          plugins={[
+            dayGridPlugin,
+            timeGridPlugin,
+            interactionPlugin,
+            rrulePlugin,
+          ]}
           initialView={"dayGridMonth"}
           headerToolbar={{
             center: "prev,title,next",
@@ -169,20 +199,24 @@ function MyCalendar() {
           eventRender={handleEventRender}
           validRange={validRange}
           buttonText={{
-            today:    'Today',
-            month:    'Month',
-            week:     'Week',
-            day:      'Day',
-            list:     'List'
+            today: "Today",
+            month: "Month",
+            week: "Week",
+            day: "Day",
+            list: "List",
           }}
-          themeSystem='bootstrap5'
+          themeSystem="bootstrap5"
         />
       </div>
+
       {showModal && (
         <Modal>
           <form onSubmit={handleFormSubmit}>
             <div className={styles.calModal}>
-              <h2>Create event on {timeConversion(selectedDate?.date)}</h2>
+              <h2>
+                {isCreateMode ? "Create" : "Update"} event on{" "}
+                {timeConversion(selectedDate?.date)}
+              </h2>
               <input
                 name="title"
                 placeholder="Add title"
@@ -202,6 +236,16 @@ function MyCalendar() {
                   return <option key={index}>{option}</option>;
                 })}
               </select>
+              <div className={styles.endDate}>
+                <label>Select end date(optional)</label>
+                <input
+                  name="endDate"
+                  type="date"
+                  value={inputs?.endDate}
+                  min={selectedDate.dateStr}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </div>
               <div className={styles.calSelectTime}>
                 <div className={styles.timeInput}>
                   <label>Select start time</label>
@@ -226,6 +270,17 @@ function MyCalendar() {
                 </div>
               </div>
               <div style={{ textAlign: "left" }}>
+                Recurring Days:
+                <Select
+                  value={eventDays}
+                  isMulti
+                  onChange={(e) => {
+                    setEventDays(e);
+                  }}
+                  options={weeklyRecurse}
+                />
+              </div>
+              <div style={{ textAlign: "left" }}>
                 <Select
                   name="users"
                   isMulti
@@ -235,7 +290,7 @@ function MyCalendar() {
                 />
               </div>
               <div className={styles.calButton}>
-                <button type="submit">
+                <button type="submit" oncClick={() => resetState()}>
                   {isCreateMode ? "Save" : "Update"}
                 </button>
                 {!isCreateMode && (
@@ -243,9 +298,8 @@ function MyCalendar() {
                     type="button"
                     onClick={() => {
                       dispatch(deleteEvent(inputs?.id));
-                      setInputs({});
-                      setSelectedUsers([]);
                       setShowModal(false);
+                      resetState();
                     }}
                   >
                     Delete
@@ -253,8 +307,7 @@ function MyCalendar() {
                 )}
                 <button
                   onClick={() => {
-                    setInputs({});
-                    setSelectedUsers([]);
+                    resetState();
                     setShowModal(false);
                   }}
                 >
