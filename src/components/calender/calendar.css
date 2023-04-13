@@ -9,7 +9,12 @@
   margin: 1px !important;
 }
 
-.fc-day-sat, .fc-day-sun{
+th[class~="fc-day-sun"] {
+  pointer-events: none !important;
+  background-color: rgb(236, 241, 174) !important;
+}
+
+.fc-col-header-cell + .fc-day-sat {
   pointer-events: none !important;
   background-color: rgb(236, 241, 174) !important;
 }

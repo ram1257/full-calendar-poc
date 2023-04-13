@@ -29,6 +29,7 @@ import {
 function MyCalendar() {
   const [selectedDate, setSelectedDate] = useState();
   const [isCreateMode, setIsCreateMode] = useState(true);
+  const [isShowRecursive, setIsShowRecursive] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [eventDays, setEventDays] = useState([]);
   const events = useSelector((state) => state.calendarState);
@@ -54,6 +55,7 @@ function MyCalendar() {
   }, [events, events.length]);
 
   const resetState = () => {
+    setEventDays([]);
     setInputs({});
     setSelectedUsers([]);
   };
@@ -131,7 +133,8 @@ function MyCalendar() {
       end: setTime(eventData[0]?.end),
       endDate: eventData[0]?.end.split("T")[0],
     });
-    setSelectedUsers(eventData[0].users);
+    setSelectedUsers(eventData[0]?.users);
+    setEventDays(eventData[0]?.recursiveEvents);
     setSelectedDate({
       dateStr: `${arg.event.startStr?.split("T")[0]}`,
       date: `${arg.event.start}`,
@@ -144,7 +147,7 @@ function MyCalendar() {
     return date >= today;
   };
 
-  const handleEventRender = ({ event, el }) => {
+  const handleEventRender = ({ event, el, info }) => {
     el.className = `fc-event-${event.extendedProps.type}`;
   };
 
@@ -171,6 +174,11 @@ function MyCalendar() {
     setSelectedUsers(selectedUsers);
   };
 
+  const handleCheckBox = () => {
+    setIsShowRecursive((show) => !show);
+    setEventDays([])
+  };
+
   return (
     <div>
       <div className="fullCalendarWrapper">
@@ -182,6 +190,11 @@ function MyCalendar() {
             interactionPlugin,
             rrulePlugin,
           ]}
+          businessHours={{
+            dow: [1, 2, 3, 4, 5],
+            start: "09:00",
+            end: "18:00",
+          }}
           initialView={"dayGridMonth"}
           headerToolbar={{
             center: "prev,title,next",
@@ -246,6 +259,20 @@ function MyCalendar() {
                   onChange={(e) => setEndDate(e.target.value)}
                 />
               </div>
+              <div style={{ textAlign: "left" }}>
+                <input type="checkbox" onChange={handleCheckBox} />
+                Recurring Days:
+                {isShowRecursive && (
+                  <Select
+                    value={eventDays}
+                    isMulti
+                    onChange={(e) => {
+                      setEventDays(e);
+                    }}
+                    options={weeklyRecurse}
+                  />
+                )}
+              </div>
               <div className={styles.calSelectTime}>
                 <div className={styles.timeInput}>
                   <label>Select start time</label>
@@ -268,17 +295,6 @@ function MyCalendar() {
                     required
                   />
                 </div>
-              </div>
-              <div style={{ textAlign: "left" }}>
-                Recurring Days:
-                <Select
-                  value={eventDays}
-                  isMulti
-                  onChange={(e) => {
-                    setEventDays(e);
-                  }}
-                  options={weeklyRecurse}
-                />
               </div>
               <div style={{ textAlign: "left" }}>
                 <Select

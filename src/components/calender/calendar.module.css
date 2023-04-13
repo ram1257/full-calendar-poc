@@ -1,7 +1,7 @@
 .calModal {
   border-radius: 5px;
   background-color: white;
-  padding: 30px;
+  padding: 0px 30px 30px 30px;
   display: grid;
   grid-template-rows: auto;
   gap: 8px;
