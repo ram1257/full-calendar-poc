@@ -58,6 +58,7 @@ function MyCalendar() {
     setEventDays([]);
     setInputs({});
     setSelectedUsers([]);
+    setIsShowRecursive(false);
   };
 
   const eventSelectOptions = ["type1", "type2", "type3"];
@@ -99,7 +100,9 @@ function MyCalendar() {
   const handleFormSubmit = (e) => {
     e.preventDefault();
     const daysOfWeek = eventDays?.map((a) => a?.value);
-    const rrule = `FREQ=WEEKLY;BYDAY=${daysOfWeek?.join(",")}`;
+    const rrule = `FREQ=WEEKLY;BYDAY=${daysOfWeek?.join(",")}${
+      endDate ? ";UNTIL=" + endDate?.split("-")?.join("") : ""
+    }`;
     const event = {
       id: isCreateMode ? Date.now() : inputs?.id,
       title: inputs.title,
@@ -133,6 +136,7 @@ function MyCalendar() {
       end: setTime(eventData[0]?.end),
       endDate: eventData[0]?.end.split("T")[0],
     });
+    eventData[0]?.recursiveEvents?.length > 0 && setIsShowRecursive(true);
     setSelectedUsers(eventData[0]?.users);
     setEventDays(eventData[0]?.recursiveEvents);
     setSelectedDate({
@@ -176,7 +180,7 @@ function MyCalendar() {
 
   const handleCheckBox = () => {
     setIsShowRecursive((show) => !show);
-    setEventDays([])
+    setEventDays([]);
   };
 
   return (
@@ -254,13 +258,13 @@ function MyCalendar() {
                 <input
                   name="endDate"
                   type="date"
-                  value={inputs?.endDate}
-                  min={selectedDate.dateStr}
+                  value={endDate}
+                  // min={selectedDate.dateStr}
                   onChange={(e) => setEndDate(e.target.value)}
                 />
               </div>
               <div style={{ textAlign: "left" }}>
-                <input type="checkbox" onChange={handleCheckBox} />
+                <input type="checkbox" onChange={handleCheckBox} defaultChecked={isShowRecursive} />
                 Recurring Days:
                 {isShowRecursive && (
                   <Select
