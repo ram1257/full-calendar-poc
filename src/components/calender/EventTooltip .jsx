@@ -9,7 +9,7 @@ const EventTooltip = ({ event, mouseCoords }) => {
     const tooltip = tooltipRef?.current;
     const tooltipRect = tooltip?.getBoundingClientRect();
     const x = mouseCoords?.x - tooltipRect?.width / 2;
-    const y = mouseCoords?.y - tooltipRect?.height + 15;
+    const y = mouseCoords?.y - tooltipRect?.height - 10;
     tooltip.style.top = `${y}px`;
     tooltip.style.left = `${x}px`;
   }, [event, mouseCoords]);

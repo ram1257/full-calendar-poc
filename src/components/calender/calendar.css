@@ -3,9 +3,8 @@
   gap: 10px;
 }
 .fullCalendarWrapper {
+  width: 98vw;
   position: relative;
-  height: 600px;
-  margin: 0 auto;
 }
 .fullCalendarWrapper button {
   background-color: rgb(26, 115, 232) !important;
