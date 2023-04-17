@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 
 function NotificationComponent({ props }) {
-  console.log(props);
   const [notificationGranted, setNotificationGranted] = useState(false);
 
   useEffect(() => {
