@@ -25,6 +25,7 @@ import {
   postEventData,
   updateEvent,
 } from "../../store/calendar/calendarActions";
+import NotificationComponent from "../notification/NotificationComponent";
 
 function MyCalendar() {
   const [selectedDate, setSelectedDate] = useState();
@@ -224,6 +225,7 @@ function MyCalendar() {
           }}
           themeSystem="bootstrap5"
         />
+        <NotificationComponent props={events} />
       </div>
 
       {showModal && (
@@ -264,7 +266,11 @@ function MyCalendar() {
                 />
               </div>
               <div style={{ textAlign: "left" }}>
-                <input type="checkbox" onChange={handleCheckBox} defaultChecked={isShowRecursive} />
+                <input
+                  type="checkbox"
+                  onChange={handleCheckBox}
+                  defaultChecked={isShowRecursive}
+                />
                 Recurring Days:
                 {isShowRecursive && (
                   <Select
