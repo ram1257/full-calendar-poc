@@ -26,6 +26,7 @@ import {
   updateEvent,
 } from "../../store/calendar/calendarActions";
 import NotificationComponent from "../notification/NotificationComponent";
+import EventTooltip from "./EventTooltip ";
 
 function MyCalendar() {
   const [selectedDate, setSelectedDate] = useState();
@@ -33,6 +34,8 @@ function MyCalendar() {
   const [isShowRecursive, setIsShowRecursive] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [eventDays, setEventDays] = useState([]);
+  const [tooltipEvent, setTooltipEvent] = useState(null);
+  const [mouseCoords, setMouseCoords] = useState({ x: 0, y: 0 });
   const events = useSelector((state) => state.calendarState);
   const calendarRef = useRef(null);
   const dispatch = useDispatch();
@@ -45,6 +48,7 @@ function MyCalendar() {
     endDate: "",
   });
   const [selectedUsers, setSelectedUsers] = useState([]);
+
   useEffect(() => {
     dispatch(fetchEventData());
   }, [dispatch]);
@@ -55,6 +59,7 @@ function MyCalendar() {
     }
   }, [events, events.length]);
 
+  // Clear the state values
   const resetState = () => {
     setEventDays([]);
     setInputs({});
@@ -62,6 +67,20 @@ function MyCalendar() {
     setIsShowRecursive(false);
   };
 
+  // To add the event tooltip
+  const handleEventMouseEnter = (info) => {
+    setTooltipEvent(info.event);
+  };
+
+  const handleEventMouseLeave = () => {
+    setTooltipEvent(null);
+  };
+
+  const handleMouseMove = (e) => {
+    setMouseCoords({ x: e.clientX, y: e.clientY });
+  };
+
+  //Form drop down option values 
   const eventSelectOptions = ["type1", "type2", "type3"];
   const options = [
     { value: "user01", label: "user01" },
@@ -78,12 +97,14 @@ function MyCalendar() {
     { value: "SU", label: "Sunday" },
   ];
 
+  // Handle the form inputs
   const handleInputs = (event) => {
     const name = event.target.name;
     const value = event.target.value;
     setInputs((values) => ({ ...values, [name]: value }));
   };
 
+  // To create the new event
   const handleDateClick = (arg) => {
     isCreateMode && setInputs("");
     setIsCreateMode(true);
@@ -91,6 +112,7 @@ function MyCalendar() {
     setSelectedDate({ date: arg.date, dateStr: arg.dateStr });
   };
 
+  // Time stamp convert in to hh:mm format
   const setTime = (timestamp) => {
     const date = new Date(timestamp);
     const currentHours = ("0" + date.getHours()).slice(-2);
@@ -98,6 +120,28 @@ function MyCalendar() {
     return `${currentHours}:${currentMinutes}`;
   };
 
+  // To view or update the existing event
+  const handleEventClick = (arg) => {
+    setIsCreateMode(false);
+    setShowModal(true);
+    const id = { ...arg.event.toPlainObject() }.id;
+    const eventData = events.filter((event) => +event.id === +id);
+    setInputs({
+      ...eventData[0],
+      start: setTime(eventData[0]?.start),
+      end: setTime(eventData[0]?.end),
+      endDate: eventData[0]?.end.split("T")[0],
+    });
+    eventData[0]?.recursiveEvents?.length > 0 && setIsShowRecursive(true);
+    setSelectedUsers(eventData[0]?.users);
+    setEventDays(eventData[0]?.recursiveEvents);
+    setSelectedDate({
+      dateStr: `${arg.event.startStr?.split("T")[0]}`,
+      date: `${arg.event.start}`,
+    });
+  };
+
+  // Handle the form submit
   const handleFormSubmit = (e) => {
     e.preventDefault();
     const daysOfWeek = eventDays?.map((a) => a?.value);
@@ -124,26 +168,6 @@ function MyCalendar() {
     isCreateMode ? dispatch(addEvent(event)) : dispatch(updateEvent(event));
     resetState();
     setShowModal(false);
-  };
-
-  const handleEventClick = (arg) => {
-    setIsCreateMode(false);
-    setShowModal(true);
-    const id = { ...arg.event.toPlainObject() }.id;
-    const eventData = events.filter((event) => +event.id === +id);
-    setInputs({
-      ...eventData[0],
-      start: setTime(eventData[0]?.start),
-      end: setTime(eventData[0]?.end),
-      endDate: eventData[0]?.end.split("T")[0],
-    });
-    eventData[0]?.recursiveEvents?.length > 0 && setIsShowRecursive(true);
-    setSelectedUsers(eventData[0]?.users);
-    setEventDays(eventData[0]?.recursiveEvents);
-    setSelectedDate({
-      dateStr: `${arg.event.startStr?.split("T")[0]}`,
-      date: `${arg.event.start}`,
-    });
   };
 
   const isSelectable = (info) => {
@@ -186,7 +210,7 @@ function MyCalendar() {
 
   return (
     <div>
-      <div className="fullCalendarWrapper">
+      <div className="fullCalendarWrapper" onMouseMove={handleMouseMove}>
         <Fullcalendar
           ref={calendarRef}
           plugins={[
@@ -223,10 +247,14 @@ function MyCalendar() {
             day: "Day",
             list: "List",
           }}
-          themeSystem="bootstrap5"
+          eventMouseEnter={handleEventMouseEnter}
+          eventMouseLeave={handleEventMouseLeave}
         />
-        <NotificationComponent props={events} />
+        {tooltipEvent && (
+          <EventTooltip event={tooltipEvent} mouseCoords={mouseCoords} />
+        )}
       </div>
+      <NotificationComponent props={events} />
 
       {showModal && (
         <Modal>

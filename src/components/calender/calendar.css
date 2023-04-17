@@ -2,7 +2,11 @@
   display: flex;
   gap: 10px;
 }
-
+.fullCalendarWrapper {
+  position: relative;
+  height: 600px;
+  margin: 0 auto;
+}
 .fullCalendarWrapper button {
   background-color: rgb(26, 115, 232) !important;
   border: none !important;

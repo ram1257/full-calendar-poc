@@ -118,3 +118,28 @@ select:focus {
   border-width: 1px;
   box-sizing: border-box;
 }
+
+/* Styles for tooltips */
+.tooltip {
+  position: absolute;
+  z-index: 9999;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  font-size: 14px;
+  line-height: 1.5;
+  max-width: 300px;
+}
+
+.tooltip h4 {
+  margin-top: 0;
+}
+.tooltip h4::first-letter{
+  text-transform: capitalize;
+} 
+
+.tooltip p {
+  margin-bottom: 5px;
+}
